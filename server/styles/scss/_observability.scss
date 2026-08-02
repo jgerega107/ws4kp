@@ -1,0 +1,299 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+#system-information-html,
+#reverse-proxy-information-html {
+	background-image: url(../images/backgrounds/1-chart.png);
+
+	.wide.enhanced & {
+		background-image: url(../images/backgrounds/1-chart-wide.png);
+		background-position-x: 0;
+	}
+
+	.portrait.enhanced & {
+		background-image: url(../images/backgrounds/1-chart-portrait.png);
+		background-position-x: 0;
+	}
+}
+
+#divTwc.system-information #container>.scroll,
+#divTwc.reverse-proxy-information #container>.scroll {
+	display: none !important;
+}
+
+.weather-display .observability {
+	@include u.text-shadow();
+	font-family: 'Star4000 Small';
+
+	.entity-name {
+		color: c.$column-header-text;
+		font-family: 'Star4000 Small';
+		font-size: 24px;
+		overflow: hidden;
+		line-height: 27px;
+		padding: 4px 16px 2px;
+		text-align: center;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.chart-grid {
+		display: grid;
+		gap: 5px 10px;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-rows: repeat(2, minmax(0, 1fr));
+		padding: 0 10px;
+	}
+
+	.metric-card,
+	.log-volume {
+		--chart-color: aqua;
+		--chart-fill: rgba(0, 255, 255, 0.12);
+		background-color: rgba(0, 8, 60, 0.16);
+		padding: 2px 5px 4px;
+	}
+
+	.chart-heading {
+		color: var(--chart-color);
+		display: flex;
+		font-family: 'Star4000 Small';
+		font-size: 20px;
+		justify-content: space-between;
+		line-height: 22px;
+		white-space: nowrap;
+
+		.disk-detail {
+			color: white;
+			font-size: 13px;
+		}
+	}
+
+	.trend-chart {
+		height: 100px;
+		position: relative;
+		width: 100%;
+
+		.chart-plot {
+			bottom: 18px;
+			left: 38px;
+			position: absolute;
+			right: 0;
+			top: 0;
+		}
+
+		.chart-plot svg {
+			display: block;
+			height: 100%;
+			overflow: visible;
+			width: 100%;
+		}
+
+		.chart-grid-line {
+			stroke: rgba(190, 205, 255, 0.35);
+			stroke-width: 0.7;
+			vector-effect: non-scaling-stroke;
+		}
+
+		.chart-area {
+			fill: var(--chart-fill);
+		}
+
+		.chart-line-shadow {
+			fill: none;
+			stroke: black;
+			stroke-linejoin: round;
+			stroke-width: 5;
+			vector-effect: non-scaling-stroke;
+		}
+
+		.chart-line {
+			fill: none;
+			stroke: var(--chart-color);
+			stroke-linejoin: round;
+			stroke-width: 3;
+			vector-effect: non-scaling-stroke;
+		}
+
+		.chart-y-axis,
+		.chart-x-axis {
+			color: c.$column-header-text;
+			display: flex;
+			font-family: 'Star4000 Small';
+			font-size: 13px;
+			position: absolute;
+		}
+
+		.chart-y-axis {
+			align-items: flex-end;
+			bottom: 18px;
+			flex-direction: column;
+			justify-content: space-between;
+			left: 0;
+			top: -7px;
+			width: 34px;
+		}
+
+		.chart-x-axis {
+			bottom: 0;
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			left: 38px;
+			line-height: 17px;
+			right: 0;
+
+			.axis-label:nth-child(2) {
+				text-align: center;
+			}
+
+			.axis-label:last-child {
+				text-align: right;
+			}
+		}
+
+		.chart-no-data {
+			color: #c0c0c0;
+			font-family: 'Star4000 Small';
+			font-size: 24px;
+			padding-top: 22px;
+			text-align: center;
+		}
+
+		.chart-legend {
+			background-color: rgba(0, 8, 60, 0.78);
+			display: flex;
+			flex-wrap: wrap;
+			font-family: 'Star4000 Small';
+			font-size: 10px;
+			gap: 0 5px;
+			left: 41px;
+			line-height: 11px;
+			padding: 1px 2px;
+			position: absolute;
+			right: 2px;
+			top: 0;
+			z-index: 1;
+		}
+
+		.chart-legend-item {
+			align-items: center;
+			display: inline-flex;
+			max-width: 72px;
+		}
+
+		.chart-legend-swatch {
+			display: inline-block;
+			flex: 0 0 8px;
+			height: 3px;
+			margin-right: 2px;
+		}
+
+		.chart-legend-label {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	.cpu-card {
+		--chart-color: aqua;
+		--chart-fill: rgba(0, 255, 255, 0.12);
+	}
+
+	.memory-card {
+		--chart-color: #38df55;
+		--chart-fill: rgba(56, 223, 85, 0.12);
+	}
+
+	.disk-card {
+		--chart-color: lightgrey;
+		--chart-fill: rgba(211, 211, 211, 0.12);
+	}
+
+	.temperature-card {
+		--chart-color: #ff3b30;
+		--chart-fill: rgba(255, 59, 48, 0.12);
+	}
+
+	.log-volume {
+		--chart-color: #ffcf33;
+		--chart-fill: rgba(255, 207, 51, 0.12);
+		margin: 5px 12px 0;
+		padding: 5px 8px 2px;
+
+		.chart-heading {
+			font-family: 'Star4000 Small';
+			font-size: 28px;
+			line-height: 34px;
+		}
+
+		.trend-chart {
+			height: 210px;
+
+			.chart-y-axis,
+			.chart-x-axis {
+				font-size: 25px;
+			}
+
+			.chart-y-axis {
+				width: 58px;
+			}
+
+			.chart-plot,
+			.chart-x-axis {
+				left: 64px;
+			}
+		}
+	}
+
+	.wide.enhanced & {
+		.chart-grid {
+			gap: 5px 14px;
+			padding: 0 24px;
+		}
+	}
+
+	.portrait.enhanced & {
+		.entity-name {
+			font-size: 26px;
+			padding-top: 20px;
+		}
+
+		.chart-grid {
+			gap: 12px 14px;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			grid-template-rows: repeat(2, minmax(0, 1fr));
+			padding: 20px 20px 0;
+		}
+
+		.chart-heading {
+			font-size: 20px;
+			line-height: 23px;
+		}
+
+		.trend-chart {
+			height: 220px;
+
+			.chart-y-axis,
+			.chart-x-axis {
+				font-size: 14px;
+			}
+
+			.chart-y-axis {
+				width: 37px;
+			}
+
+			.chart-plot,
+			.chart-x-axis {
+				left: 41px;
+			}
+		}
+
+		.log-volume {
+			margin: 70px 30px 0;
+
+			.trend-chart {
+				height: 500px;
+			}
+		}
+	}
+}

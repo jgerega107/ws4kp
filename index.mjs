@@ -9,6 +9,9 @@ import playlist from './src/playlist.mjs';
 import OVERRIDES from './src/overrides.mjs';
 import cache from './proxy/cache.mjs';
 import devTools from './src/com.chrome.devtools.mjs';
+import {
+	createObservabilityHandlers, getObservabilityConfig,
+} from './proxy/observability.mjs';
 
 const travelCities = JSON.parse(await readFile('./datagenerators/output/travelcities.json'));
 const regionalCities = JSON.parse(await readFile('./datagenerators/output/regionalcities.json'));
@@ -16,6 +19,12 @@ const stationInfo = JSON.parse(await readFile('./datagenerators/output/stations.
 
 const app = express();
 const port = process.env.WS4KP_PORT ?? 8080;
+const serverAvailable = !process.env?.STATIC;
+const observabilityConfig = serverAvailable ? getObservabilityConfig() : {};
+const observabilityAvailability = {
+	prometheus: serverAvailable && !!observabilityConfig.prometheusUrl,
+	loki: serverAvailable && !!observabilityConfig.lokiUrl,
+};
 
 // Set X-Weatherstar header globally for playlist fallback detection
 app.use((req, res, next) => {
@@ -28,6 +37,7 @@ app.set('view engine', 'ejs');
 
 // version
 const { version } = JSON.parse(fs.readFileSync('package.json'));
+const assetVersion = `${version}-${Date.now()}`;
 
 // read and parse environment variables to append to the query string
 // use the permalink (share) button on the web app to generate a starting point for your configuration
@@ -55,10 +65,12 @@ const defaultSearchParams = (new URLSearchParams(qsVars)).toString();
 const renderIndex = (req, res, production = false) => {
 	res.render('index', {
 		production,
-		serverAvailable: !process.env?.STATIC, // Disable caching proxy server in static mode
+		serverAvailable, // Disable caching proxy server in static mode
 		version,
 		OVERRIDES,
 		query: req.query,
+		observability: observabilityAvailability,
+		assetVersion,
 	});
 };
 
@@ -131,6 +143,14 @@ if (!process.env?.STATIC) {
 	app.use('/spc/', outlookProxy);
 	app.use('/mesonet/', mesonetProxy);
 	app.use('/forecast/', forecastProxy);
+
+	const observabilityHandlers = createObservabilityHandlers(observabilityConfig);
+	if (observabilityAvailability.prometheus) {
+		app.get('/observability/system', observabilityHandlers.system);
+	}
+	if (observabilityAvailability.loki) {
+		app.get('/observability/reverse-proxy', observabilityHandlers.reverseProxy);
+	}
 
 	// Playlist route is available in server mode (not in static mode)
 	app.get('/playlist.json', playlist);

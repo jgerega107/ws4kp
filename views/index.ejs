@@ -27,14 +27,17 @@
     window.WS4KP_SERVER_AVAILABLE = true;
   </script>
   <% } %>
+  <script>
+    window.WS4KP_OBSERVABILITY = <%- JSON.stringify(observability ?? { prometheus: false, loki: false }) %>;
+  </script>
 
   <% if (production) { %>
-  <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>" />
-  <script type="text/javascript" src="resources/vendor.min.js?_=<%=production%>"></script>
-  <script type="text/javascript" src="resources/index.min.js?_=<%=production%>"></script>
-  <script type="text/javascript" src="resources/displays.min.js?_=<%=production%>"></script>
-  <script type="text/javascript" src="resources/features.min.js?_=<%=production%>"></script>
-  <script type="text/javascript" src="resources/shared.min.js?_=<%=production%>"></script>
+  <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=assetVersion%>" />
+  <script type="text/javascript" src="resources/vendor.min.js?_=<%=assetVersion%>"></script>
+  <script type="text/javascript" src="resources/index.min.js?_=<%=assetVersion%>"></script>
+  <script type="text/javascript" src="resources/displays.min.js?_=<%=assetVersion%>"></script>
+  <script type="text/javascript" src="resources/features.min.js?_=<%=assetVersion%>"></script>
+  <script type="text/javascript" src="resources/shared.min.js?_=<%=assetVersion%>"></script>
   <script type="text/javascript">
     const OVERRIDES = <%- JSON.stringify(OVERRIDES ?? {}) %>;
   </script>
@@ -60,6 +63,8 @@
   <script type="module" src="scripts/modules/radar.mjs"></script>
   <script type="module" src="scripts/modules/regionalforecast.mjs"></script>
   <script type="module" src="scripts/modules/travelforecast.mjs"></script>
+  <script type="module" src="scripts/modules/system-information.mjs"></script>
+  <script type="module" src="scripts/modules/reverse-proxy-information.mjs"></script>
   <script type="module" src="scripts/modules/progress.mjs"></script>
   <script type="module" src="scripts/modules/radar.mjs"></script>
   <script type="module" src="scripts/modules/settings.mjs"></script>
@@ -135,6 +140,16 @@
         <div id="hazards-html" class="weather-display">
           <%- include('partials/hazards.ejs') %>
         </div>
+        <% if (observability?.prometheus) { %>
+        <div id="system-information-html" class="weather-display">
+          <%- include('partials/system-information.ejs') %>
+        </div>
+        <% } %>
+        <% if (observability?.loki) { %>
+        <div id="reverse-proxy-information-html" class="weather-display">
+          <%- include('partials/reverse-proxy-information.ejs') %>
+        </div>
+        <% } %>
         <%- include('partials/scroll.ejs') %>
       </div>
     </div>

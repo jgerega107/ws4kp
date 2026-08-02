@@ -56,6 +56,8 @@ const webpackOptions = {
 				'./server/scripts/modules/radar.mjs',
 				'./server/scripts/modules/regionalforecast.mjs',
 				'./server/scripts/modules/travelforecast.mjs',
+				'./server/scripts/modules/system-information.mjs',
+				'./server/scripts/modules/reverse-proxy-information.mjs',
 			],
 			dependOn: 'shared',
 		},
@@ -121,6 +123,8 @@ const mjsSources = [
 	'server/scripts/modules/radar.mjs',
 	'server/scripts/modules/regionalforecast.mjs',
 	'server/scripts/modules/travelforecast.mjs',
+	'server/scripts/modules/system-information.mjs',
+	'server/scripts/modules/reverse-proxy-information.mjs',
 	'server/scripts/modules/progress.mjs',
 	'server/scripts/modules/media.mjs',
 	'server/scripts/modules/custom-scroll-text.mjs',
@@ -159,6 +163,8 @@ const compressHtml = async () => {
 			version,
 			OVERRIDES,
 			query: {},
+			observability: { prometheus: false, loki: false },
+			assetVersion: version,
 		}))
 		.pipe(rename({ extname: '.html' }))
 		.pipe(htmlmin({ collapseWhitespace: true }))

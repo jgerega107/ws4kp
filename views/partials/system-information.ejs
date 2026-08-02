@@ -1,0 +1,22 @@
+<%- include('header.ejs', {titleDual:{ top: 'System' , bottom: 'Information' }, hasTime: true}) %>
+<div class="main has-scroll has-box observability system-information can-enhance">
+  <div class="entity-name"></div>
+  <div class="chart-grid">
+    <div class="metric-card cpu-card">
+      <div class="chart-heading"><span>CPU / 1H</span><span class="cpu-value"></span></div>
+      <div class="trend-chart cpu-chart"></div>
+    </div>
+    <div class="metric-card memory-card">
+      <div class="chart-heading"><span>Memory / 1H</span><span class="memory-value"></span></div>
+      <div class="trend-chart memory-chart"></div>
+    </div>
+    <div class="metric-card disk-card">
+      <div class="chart-heading"><span>Disk / 1H</span><span class="disk-count"></span></div>
+      <div class="trend-chart disk-chart"></div>
+    </div>
+    <div class="metric-card temperature-card">
+      <div class="chart-heading"><span>Temp / 1H</span><span class="temperature-value"></span></div>
+      <div class="trend-chart temperature-chart"></div>
+    </div>
+  </div>
+</div>

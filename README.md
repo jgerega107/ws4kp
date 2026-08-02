@@ -217,6 +217,27 @@ Environment variables that are to be added to the default query string are prefi
 
 When using the Docker container, these environment variables are read on container start-up to generate the static redirect HTML.
 
+### Observability displays
+
+The Express server deployment can add two opt-in monitoring displays to the normal WeatherStar playlist. These displays are not available in the static nginx deployment because their backing services are queried by the Node.js server.
+
+Set either or both of these environment variables before starting the server:
+
+```bash
+WS4KP_PROMETHEUS_URL=http://prometheus:9090
+WS4KP_LOKI_URL=http://loki:3100
+```
+
+`WS4KP_PROMETHEUS_URL` enables a system information display using standard node-exporter metrics. It graphs the previous hour of five-minute CPU usage, memory usage, all persistent filesystem usage, and maximum reported hardware temperature, with a separate screen for each Prometheus `instance` label. Each disk is shown as a separately colored line identified by mount point.
+
+`WS4KP_LOKI_URL` enables a reverse proxy information display. It graphs one-minute log-volume buckets across the previous hour using the Loki stream label `upstream`, with a separate screen for each upstream. This matches Grafana Logs Drilldown's auto-interval approach for a fixed one-hour range. The built-in query is:
+
+```logql
+sum by (upstream) (count_over_time({upstream=~".+"}[1m]))
+```
+
+Both displays start unchecked, refresh once per minute when enabled, and load after the normal weather location has been selected. Prometheus and Loki URLs may use HTTP or HTTPS; authenticated endpoints are not currently supported.
+
 ## Settings
 
 **Speed:** Controls the playback speed multiplier of the displays, from "Very Fast" (1.5x) to "Very Slow" (0.5x) with "Normal" being 1x
