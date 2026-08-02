@@ -146,6 +146,22 @@ services:
     restart: unless-stopped
 ```
 
+For a server deployment with the Prometheus and Loki displays enabled, use the included [`docker-compose.example.yml`](docker-compose.example.yml):
+
+```bash
+docker compose -f docker-compose.example.yml up --build
+```
+
+By default, the example connects to Prometheus on `host.docker.internal:9090` and Loki on `host.docker.internal:3100`. Override either endpoint when starting Compose:
+
+```bash
+PROMETHEUS_URL=http://prometheus:9090 \
+LOKI_URL=http://loki:3100 \
+docker compose -f docker-compose.example.yml up --build
+```
+
+Service-name URLs such as `prometheus` and `loki` require those containers to share a Docker network with `ws4kp`.
+
 ### Serving a static app
 
 There are several ways to deploy WeatherStar as a static app that runs entirely in the browser:
