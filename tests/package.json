@@ -9,8 +9,8 @@
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
-		"chalk": "^5.4.1",
-		"puppeteer": "^24.8.2"
+		"chalk": "^6.0.0",
+		"puppeteer": "^25.4.0"
 	},
 	"type": "module"
 }
