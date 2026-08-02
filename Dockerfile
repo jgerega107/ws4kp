@@ -1,19 +1,13 @@
-FROM node:25-alpine AS node-builder
+FROM node:25-alpine
 WORKDIR /app
 
-COPY package.json .
-COPY package-lock.json .
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps
 COPY . .
 
-RUN npm install
 RUN npm run build
-RUN rm dist/playlist.json
 
-FROM nginx:alpine
+EXPOSE 8080
 
-COPY static-env-handler.sh /docker-entrypoint.d/01-static-env-handler.sh
-RUN chmod +x /docker-entrypoint.d/01-static-env-handler.sh
-
-COPY --from=node-builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-CMD ["nginx", "-g", "daemon off;"]
+ENV DIST=1
+CMD ["npm", "start"]

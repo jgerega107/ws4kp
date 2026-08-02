@@ -2,7 +2,7 @@ services:
   ws4kp:
     build:
       context: .
-      dockerfile: Dockerfile.server
+      dockerfile: Dockerfile
     image: ws4kp-server:local
     container_name: ws4kp
     environment:

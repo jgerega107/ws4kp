@@ -62,14 +62,14 @@ WeatherStar 4000+ supports two deployment modes:
 * Includes Node.js server with caching proxy for better performance (especially when running on a local server for multiple clients)
 * Server-side request deduplication and caching
 * Weather API observability and logging
-* Used by: `npm start`, `DIST=1 npm start`, and `Dockerfile.server`
+* Used by: `npm start`, `DIST=1 npm start`, the default `Dockerfile`, and `Dockerfile.server`
 
 ### Static Deployment
 
 * Pure client-side deployment using nginx to serve static files
 * All API requests are made directly from each browser to the weather services
 * Browser-based caching
-* Used by: static file hosting and default `Dockerfile`
+* Used by: static file hosting and `Dockerfile.static`
 
 ## Other methods to run Ws4kp
 
@@ -113,20 +113,24 @@ For all modes, access WeatherStar by going to: http://localhost:8080/
 
 ### Docker Deployments
 
-To run via Docker using a "static deployment" where everything happens in the browser (no server component, like STATIC=1):
+To build and run the server deployment, including the optional Prometheus and Loki displays:
 
 ```bash
-docker run -p 8080:8080 ghcr.io/netbymatt/ws4kp
+docker build -t ws4kp .
+docker run -p 8080:8080 \
+  -e WS4KP_PROMETHEUS_URL=http://prometheus.example:9090 \
+  -e WS4KP_LOKI_URL=http://loki.example:3100 \
+  ws4kp
 ```
 
-To run via Docker using a "server deployment" with a caching proxy server for multi-client performance and enhanced observability (like `npm run build; DIST=1 npm start`):
+`Dockerfile.server` remains available as a compatibility alias for existing server build commands:
 
 ```bash
 docker build -f Dockerfile.server -t ws4kp-server .
 docker run -p 8080:8080 ws4kp-server
 ```
 
-To run via Docker Compose (shown here in static deployment mode):
+To run the published server image via Docker Compose:
 
 ```yaml
 ---
@@ -176,10 +180,11 @@ npm run build
 The resulting files in `/dist` can be uploaded to any web server; no server-side scripting is required.
 
 **Docker static deployment:**
-The default Docker image uses nginx to serve pre-built static files:
+Build `Dockerfile.static` to use nginx without the Node.js server. Prometheus and Loki displays are not available in this mode:
 
 ```bash
-docker run -p 8080:8080 ghcr.io/netbymatt/ws4kp
+docker build -f Dockerfile.static -t ws4kp-static .
+docker run -p 8080:8080 ws4kp-static
 ```
 
 **Node.js in static mode:**
@@ -316,7 +321,7 @@ If you're looking for the original music that played during forecasts [TWCClassi
 
 WeatherStar 4000+ supports background music during forecast playback. The music behavior depends on how you deploy the application:
 
-#### Express server modes (`npm start`, `DIST=1 npm start`, or `Dockerfile.server`)
+#### Express server modes (`npm start`, `DIST=1 npm start`, the default `Dockerfile`, or `Dockerfile.server`)
 
 When running with Node.js, the server generates a `playlist.json` file by scanning the `./server/music` directory for `.mp3` files. If no files are found in `./server/music`, it falls back to scanning `./server/music/default/`. The playlist is served dynamically at the `/playlist.json` endpoint.
 
@@ -328,7 +333,7 @@ docker build -f Dockerfile.server -t ws4kp-server .
 docker run -p 8080:8080 -v /path/to/local/music:/app/server/music ws4kp-server
 ```
 
-#### Static hosting modes (default `Dockerfile`, nginx, Apache, etc.)
+#### Static hosting modes (`Dockerfile.static`, nginx, Apache, etc.)
 
 When hosting static files, there are two scenarios:
 
@@ -344,7 +349,8 @@ For directory scanning to work properly:
 
 **Docker static example:**
 ```bash
-docker run -p 8080:8080 -v /path/to/local/music:/usr/share/nginx/html/music ghcr.io/netbymatt/ws4kp
+docker build -f Dockerfile.static -t ws4kp-static .
+docker run -p 8080:8080 -v /path/to/local/music:/usr/share/nginx/html/music ws4kp-static
 ```
 
 Subdirectories will not be scanned. When WeatherStar loads in the browser, it randomizes the track order and reshuffles on each loop through the playlist.
