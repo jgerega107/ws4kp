@@ -1,0 +1,19 @@
+<%- include('header.ejs', {
+  titleDual:{ top: 'Prometheus' , bottom: 'Alert History' },
+  hasTime: true,
+  logoSrc: 'images/observability/eggman-console.png',
+  logoAlt: 'Eggman system operator',
+  logoClass: 'observability-logo'
+}) %>
+<div class="main has-scroll has-box observability status-panel alert-history can-enhance">
+  <div class="list-summary">
+    <span>Firing During Last 24 Hours</span>
+    <span class="alert-summary"></span>
+  </div>
+  <div class="status-list">
+    <div class="status-list-header alert-columns">
+      <span>Alert</span><span>State</span><span>Firing</span>
+    </div>
+    <div class="status-list-rows"></div>
+  </div>
+</div>

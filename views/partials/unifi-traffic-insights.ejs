@@ -1,0 +1,19 @@
+<%- include('header.ejs', {
+  titleDual:{ top: 'UniFi' , bottom: 'Traffic Insights' },
+  hasTime: true,
+  logoSrc: 'images/observability/eggman-console.png',
+  logoAlt: 'Eggman system operator',
+  logoClass: 'observability-logo'
+}) %>
+<div class="main has-scroll has-box observability status-panel unifi-traffic-insights can-enhance">
+  <div class="list-summary">
+    <span class="page-label">Top Applications</span>
+    <span class="traffic-summary"></span>
+  </div>
+  <div class="status-list">
+    <div class="status-list-header traffic-columns">
+      <span>Name</span><span>Traffic</span><span>Share</span>
+    </div>
+    <div class="status-list-rows"></div>
+  </div>
+</div>

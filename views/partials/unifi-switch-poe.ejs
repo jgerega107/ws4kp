@@ -1,0 +1,19 @@
+<%- include('header.ejs', {
+  titleDual:{ top: 'UniFi' , bottom: 'Switch & PoE' },
+  hasTime: true,
+  logoSrc: 'images/observability/eggman-console.png',
+  logoAlt: 'Eggman system operator',
+  logoClass: 'observability-logo'
+}) %>
+<div class="main has-scroll has-box observability status-panel unifi-switch-poe can-enhance">
+  <div class="list-summary">
+    <span class="page-label">Switch Ports</span>
+    <span class="port-summary"></span>
+  </div>
+  <div class="status-list">
+    <div class="status-list-header switch-columns">
+      <span>Port</span><span>Link</span><span>PoE</span>
+    </div>
+    <div class="status-list-rows"></div>
+  </div>
+</div>

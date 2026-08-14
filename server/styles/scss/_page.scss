@@ -153,6 +153,10 @@ body {
 	&.wide {
 		max-width: p.$wide-width;
 	}
+
+	&.wide.wide-16-10 {
+		max-width: p.$wide-16-10-width;
+	}
 }
 
 .content-wrapper {
@@ -166,6 +170,10 @@ body {
 
 	.wide & {
 		width: p.$wide-width;
+	}
+
+	.wide.wide-16-10 & {
+		width: p.$wide-16-10-width;
 	}
 
 	.enhanced.portrait & {
@@ -218,6 +226,10 @@ body {
 
 	.wide & {
 		width: p.$wide-width;
+	}
+
+	.wide.wide-16-10 & {
+		width: p.$wide-16-10-width;
 	}
 
 	@media (prefers-color-scheme: dark) {
@@ -361,6 +373,11 @@ body {
 	background-repeat: no-repeat;
 }
 
+.wide.wide-16-10 #container {
+	background-position: center top;
+	width: p.$wide-16-10-width;
+}
+
 #divTwc:fullscreen #container,
 .kiosk #divTwc #container {
 	// background-image: none;
@@ -380,6 +397,10 @@ body {
 
 	.wide & {
 		margin-left: p.$wide-margin;
+	}
+
+	.wide.wide-16-10 & {
+		margin-left: p.$wide-16-10-margin;
 	}
 
 	.title {

@@ -14,4 +14,4 @@ dist/*
 !dist/readme.txt
 
 #environment variables
-.env
+.envdocker-compose.yml

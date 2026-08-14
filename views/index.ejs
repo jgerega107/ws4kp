@@ -28,7 +28,9 @@
   </script>
   <% } %>
   <script>
-    window.WS4KP_OBSERVABILITY = <%- JSON.stringify(observability ?? { prometheus: false, loki: false }) %>;
+    window.WS4KP_OBSERVABILITY = <%- JSON.stringify(observability ?? {
+      prometheus: false, loki: false, tailscale: false
+    }) %>;
   </script>
 
   <% if (production) { %>
@@ -65,6 +67,9 @@
   <script type="module" src="scripts/modules/travelforecast.mjs"></script>
   <script type="module" src="scripts/modules/system-information.mjs"></script>
   <script type="module" src="scripts/modules/reverse-proxy-information.mjs"></script>
+  <script type="module" src="scripts/modules/tailscale-status.mjs"></script>
+  <script type="module" src="scripts/modules/alert-history.mjs"></script>
+  <script type="module" src="scripts/modules/unifi-dashboards.mjs"></script>
   <script type="module" src="scripts/modules/progress.mjs"></script>
   <script type="module" src="scripts/modules/radar.mjs"></script>
   <script type="module" src="scripts/modules/settings.mjs"></script>
@@ -148,6 +153,39 @@
         <% if (observability?.loki) { %>
         <div id="reverse-proxy-information-html" class="weather-display">
           <%- include('partials/reverse-proxy-information.ejs') %>
+        </div>
+        <% } %>
+        <% if (observability?.tailscale) { %>
+        <div id="tailscale-status-html" class="weather-display">
+          <%- include('partials/tailscale-status.ejs') %>
+        </div>
+        <% } %>
+        <% if (observability?.prometheus) { %>
+        <div id="alert-history-html" class="weather-display">
+          <%- include('partials/alert-history.ejs') %>
+        </div>
+        <% } %>
+        <% if (observability?.prometheus) { %>
+        <div id="unifi-network-overview-html" class="weather-display">
+          <%- include('partials/unifi-network-overview.ejs') %>
+        </div>
+        <div id="unifi-wan-performance-html" class="weather-display">
+          <%- include('partials/unifi-wan-performance.ejs') %>
+        </div>
+        <div id="unifi-wifi-health-html" class="weather-display">
+          <%- include('partials/unifi-wifi-health.ejs') %>
+        </div>
+        <div id="unifi-device-health-html" class="weather-display">
+          <%- include('partials/unifi-device-health.ejs') %>
+        </div>
+        <div id="unifi-switch-poe-html" class="weather-display">
+          <%- include('partials/unifi-switch-poe.ejs') %>
+        </div>
+        <div id="unifi-traffic-insights-html" class="weather-display">
+          <%- include('partials/unifi-traffic-insights.ejs') %>
+        </div>
+        <div id="unifi-network-capacity-html" class="weather-display">
+          <%- include('partials/unifi-network-capacity.ejs') %>
         </div>
         <% } %>
         <%- include('partials/scroll.ejs') %>

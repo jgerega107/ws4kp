@@ -1,0 +1,28 @@
+<%- include('header.ejs', {
+  titleDual:{ top: 'UniFi' , bottom: 'Network Overview' },
+  hasTime: true,
+  logoSrc: 'images/observability/eggman-console.png',
+  logoAlt: 'Eggman system operator',
+  logoClass: 'observability-logo'
+}) %>
+<div class="main has-scroll has-box observability unifi-network-overview can-enhance">
+  <div class="observability-heading"><div class="entity-name"></div></div>
+  <div class="chart-grid">
+    <div class="metric-card metric-green legend-bottom wide-axis">
+      <div class="chart-heading"><span>Traffic / 1H</span><span class="traffic-value"></span></div>
+      <div class="trend-chart traffic-chart"></div>
+    </div>
+    <div class="metric-card metric-blue">
+      <div class="chart-heading"><span>Clients / 1H</span><span class="clients-value"></span></div>
+      <div class="trend-chart clients-chart"></div>
+    </div>
+    <div class="metric-card metric-red">
+      <div class="chart-heading"><span>Latency / 1H</span><span class="latency-value"></span></div>
+      <div class="trend-chart latency-chart"></div>
+    </div>
+    <div class="metric-card metric-yellow">
+      <div class="chart-heading"><span>Offline / 1H</span><span class="offline-value"></span></div>
+      <div class="trend-chart offline-chart"></div>
+    </div>
+  </div>
+</div>

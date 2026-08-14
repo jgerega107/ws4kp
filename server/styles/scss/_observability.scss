@@ -1,29 +1,145 @@
 @use 'shared/_colors'as c;
 @use 'shared/_utils'as u;
+@use 'shared/_positions'as p;
 
 #system-information-html,
-#reverse-proxy-information-html {
+#reverse-proxy-information-html,
+#tailscale-status-html,
+#alert-history-html,
+#unifi-network-overview-html,
+#unifi-wan-performance-html,
+#unifi-wifi-health-html,
+#unifi-device-health-html,
+#unifi-switch-poe-html,
+#unifi-traffic-insights-html,
+#unifi-network-capacity-html {
 	background-image: url(../images/backgrounds/1-chart.png);
+
+	&::after {
+		background-image: url(../images/backgrounds/1-chart.png);
+		background-position: 0 -118px;
+		background-repeat: no-repeat;
+		background-size: 640px 628px;
+		content: '';
+		height: 378px;
+		left: 0;
+		pointer-events: none;
+		position: absolute;
+		top: 90px;
+		width: 640px;
+		z-index: 0;
+	}
+
+	>.header,
+	>.main {
+		z-index: 1;
+	}
+
+	.wide &::after {
+		left: p.$wide-margin;
+	}
 
 	.wide.enhanced & {
 		background-image: url(../images/backgrounds/1-chart-wide.png);
 		background-position-x: 0;
 	}
 
+	.wide.enhanced &::after {
+		background-image: url(../images/backgrounds/1-chart-wide.png);
+		background-position: 0 -118px;
+		background-size: 854px 628px;
+		left: 0;
+		width: 854px;
+	}
+
 	.portrait.enhanced & {
 		background-image: url(../images/backgrounds/1-chart-portrait.png);
 		background-position-x: 0;
 	}
+
+	.portrait.enhanced &::after {
+		display: none;
+	}
+
+	.wide.wide-16-10 & {
+		background-image: url(../images/backgrounds/1-chart-wide.png);
+		background-position-x: center;
+	}
+
+	.wide.wide-16-10 &::after {
+		background-image: url(../images/backgrounds/1-chart-wide.png);
+		background-position: center -118px;
+		background-size: 854px 628px;
+		left: 0;
+		width: p.$wide-16-10-width;
+	}
+}
+
+#system-information-html,
+#reverse-proxy-information-html,
+#tailscale-status-html,
+#alert-history-html,
+#unifi-network-overview-html,
+#unifi-wan-performance-html,
+#unifi-wifi-health-html,
+#unifi-device-health-html,
+#unifi-switch-poe-html,
+#unifi-traffic-insights-html,
+#unifi-network-capacity-html {
+	>.header .logo.observability-logo {
+		align-items: center;
+		display: flex;
+		height: 66px;
+		justify-content: center;
+		top: 22px;
+		width: 85px;
+
+		img {
+			border: 2px solid #ffcf33;
+			box-shadow: 2px 2px 0 black;
+			box-sizing: border-box;
+			height: 64px;
+			image-rendering: pixelated;
+			object-fit: cover;
+			width: 64px;
+		}
+	}
 }
 
 #divTwc.system-information #container>.scroll,
-#divTwc.reverse-proxy-information #container>.scroll {
+#divTwc.reverse-proxy-information #container>.scroll,
+#divTwc.tailscale-status #container>.scroll,
+#divTwc.alert-history #container>.scroll,
+#divTwc.unifi-network-overview #container>.scroll,
+#divTwc.unifi-wan-performance #container>.scroll,
+#divTwc.unifi-wifi-health #container>.scroll,
+#divTwc.unifi-device-health #container>.scroll,
+#divTwc.unifi-switch-poe #container>.scroll,
+#divTwc.unifi-traffic-insights #container>.scroll,
+#divTwc.unifi-network-capacity #container>.scroll {
 	display: none !important;
 }
 
-.weather-display .observability {
+.weather-display .main.has-scroll.has-box.observability {
 	@include u.text-shadow();
+	box-sizing: border-box;
 	font-family: 'Star4000 Small';
+	margin-left: p.$blue-box-margin;
+	margin-right: p.$blue-box-margin;
+	min-width: 0;
+	overflow: hidden;
+	// The painted blue panel is four pixels left of the nominal canvas centre.
+	// Account for that artwork inset so charts stay centred inside its border.
+	width: calc(p.$blue-box-width - 4px);
+	height: 378px;
+
+	.observability-heading {
+		align-items: center;
+		display: flex;
+		height: 42px;
+		justify-content: center;
+		min-width: 0;
+	}
 
 	.entity-name {
 		color: c.$column-header-text;
@@ -31,18 +147,23 @@
 		font-size: 24px;
 		overflow: hidden;
 		line-height: 27px;
-		padding: 4px 16px 2px;
+		max-width: calc(100% - 54px);
+		padding: 4px 8px 2px;
 		text-align: center;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
 	.chart-grid {
+		box-sizing: border-box;
 		display: grid;
 		gap: 5px 10px;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		grid-template-rows: repeat(2, minmax(0, 1fr));
+		height: 328px;
 		padding: 0 10px;
+		width: 100%;
+		overflow: hidden;
 	}
 
 	.metric-card,
@@ -50,6 +171,11 @@
 		--chart-color: aqua;
 		--chart-fill: rgba(0, 255, 255, 0.12);
 		background-color: rgba(0, 8, 60, 0.16);
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		overflow: hidden;
 		padding: 2px 5px 4px;
 	}
 
@@ -61,6 +187,13 @@
 		justify-content: space-between;
 		line-height: 22px;
 		white-space: nowrap;
+		width: 100%;
+
+		span {
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
 
 		.disk-detail {
 			color: white;
@@ -69,7 +202,10 @@
 	}
 
 	.trend-chart {
-		height: 100px;
+		flex: 1 1 auto;
+		height: auto;
+		min-width: 0;
+		overflow: hidden;
 		position: relative;
 		width: 100%;
 
@@ -77,6 +213,7 @@
 			bottom: 18px;
 			left: 38px;
 			position: absolute;
+			overflow: hidden;
 			right: 0;
 			top: 0;
 		}
@@ -84,7 +221,7 @@
 		.chart-plot svg {
 			display: block;
 			height: 100%;
-			overflow: visible;
+			overflow: hidden;
 			width: 100%;
 		}
 
@@ -202,11 +339,54 @@
 	.memory-card {
 		--chart-color: #38df55;
 		--chart-fill: rgba(56, 223, 85, 0.12);
+
+		.trend-chart {
+			.chart-y-axis {
+				width: 44px;
+			}
+
+			.chart-plot,
+			.chart-x-axis {
+				left: 48px;
+			}
+		}
 	}
 
 	.disk-card {
 		--chart-color: lightgrey;
 		--chart-fill: rgba(211, 211, 211, 0.12);
+
+		.trend-chart {
+			.chart-plot,
+			.chart-y-axis {
+				bottom: 40px;
+			}
+
+			.chart-y-axis {
+				width: 58px;
+			}
+
+			.chart-plot,
+			.chart-x-axis {
+				left: 64px;
+			}
+
+			.chart-x-axis {
+				bottom: 22px;
+			}
+
+			.chart-legend {
+				align-content: center;
+				background-color: transparent;
+				bottom: 0;
+				height: 20px;
+				justify-content: center;
+				left: 64px;
+				overflow: hidden;
+				right: 0;
+				top: auto;
+			}
+		}
 	}
 
 	.temperature-card {
@@ -214,11 +394,73 @@
 		--chart-fill: rgba(255, 59, 48, 0.12);
 	}
 
+	.metric-blue {
+		--chart-color: aqua;
+		--chart-fill: rgba(0, 255, 255, 0.12);
+	}
+
+	.metric-green {
+		--chart-color: #38df55;
+		--chart-fill: rgba(56, 223, 85, 0.12);
+	}
+
+	.metric-yellow {
+		--chart-color: #ffcf33;
+		--chart-fill: rgba(255, 207, 51, 0.12);
+	}
+
+	.metric-red {
+		--chart-color: #ff3b30;
+		--chart-fill: rgba(255, 59, 48, 0.12);
+	}
+
+	.metric-purple {
+		--chart-color: #d66bff;
+		--chart-fill: rgba(214, 107, 255, 0.12);
+	}
+
+	.metric-card.wide-axis .trend-chart {
+		.chart-y-axis {
+			width: 58px;
+		}
+
+		.chart-plot,
+		.chart-x-axis {
+			left: 64px;
+		}
+	}
+
+	.metric-card.legend-bottom .trend-chart {
+		.chart-plot,
+		.chart-y-axis {
+			bottom: 40px;
+		}
+
+		.chart-x-axis {
+			bottom: 22px;
+		}
+
+		.chart-legend {
+			align-content: center;
+			background-color: transparent;
+			bottom: 0;
+			height: 20px;
+			justify-content: center;
+			left: 64px;
+			overflow: hidden;
+			right: 0;
+			top: auto;
+		}
+	}
+
 	.log-volume {
 		--chart-color: #ffcf33;
 		--chart-fill: rgba(255, 207, 51, 0.12);
-		margin: 5px 12px 0;
+		display: block;
+		height: 325px;
+		margin: 3px 8px 0;
 		padding: 5px 8px 2px;
+		width: calc(100% - 16px);
 
 		.chart-heading {
 			font-family: 'Star4000 Small';
@@ -227,7 +469,26 @@
 		}
 
 		.trend-chart {
-			height: 210px;
+			height: 284px;
+
+			.chart-plot,
+			.chart-y-axis {
+				bottom: 36px;
+			}
+
+			.chart-x-axis {
+				bottom: 18px;
+			}
+
+			.chart-legend {
+				align-items: center;
+				background-color: transparent;
+				bottom: 0;
+				justify-content: center;
+				left: 64px;
+				right: 0;
+				top: auto;
+			}
 
 			.chart-y-axis,
 			.chart-x-axis {
@@ -245,14 +506,167 @@
 		}
 	}
 
+	.list-summary {
+		color: c.$column-header-text;
+		display: flex;
+		font-size: 21px;
+		justify-content: space-between;
+		line-height: 29px;
+		min-width: 0;
+		padding: 0 8px;
+		white-space: nowrap;
+
+		span {
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		span:last-child {
+			color: white;
+			flex: 0 0 auto;
+			padding-left: 10px;
+		}
+	}
+
+	.status-list {
+		box-sizing: border-box;
+		min-width: 0;
+		overflow: hidden;
+		padding: 0 7px;
+		width: 100%;
+	}
+
+	.status-list-header,
+	.status-list-row {
+		align-items: center;
+		display: grid;
+		gap: 8px;
+		min-width: 0;
+
+		>span {
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	.status-list-header {
+		border-bottom: 2px solid rgba(190, 205, 255, 0.7);
+		color: aqua;
+		font-size: 17px;
+		line-height: 24px;
+	}
+
+	.status-list-row {
+		background: rgba(0, 8, 60, 0.2);
+		border-bottom: 1px solid rgba(190, 205, 255, 0.28);
+		font-size: 19px;
+		height: 37px;
+		line-height: 20px;
+
+		&:nth-child(even) {
+			background: rgba(0, 8, 60, 0.38);
+		}
+
+		small {
+			color: c.$column-header-text;
+			display: block;
+			font-size: 11px;
+			line-height: 12px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	.tailscale-columns {
+		grid-template-columns: minmax(0, 1fr) 92px 130px;
+	}
+
+	&.tailscale-status .status-list-row,
+	&.alert-history .status-list-row,
+	&.unifi-switch-poe .status-list-row,
+	&.unifi-traffic-insights .status-list-row {
+		box-sizing: border-box;
+		height: 39px;
+	}
+
+	.status-list-empty {
+		align-items: center;
+		color: white;
+		display: flex;
+		font-size: 28px;
+		height: 312px;
+		justify-content: center;
+	}
+
+	.alert-columns {
+		grid-template-columns: minmax(0, 1fr) 91px 67px;
+	}
+
+	.switch-columns {
+		grid-template-columns: minmax(0, 1fr) 88px 70px;
+	}
+
+	.traffic-columns {
+		grid-template-columns: minmax(0, 1fr) 112px 72px;
+	}
+
+	.state-value,
+	.duration-value,
+	.uptime-value,
+	.version-value,
+	.poe-value,
+	.rate-value,
+	.share-value {
+		text-align: right;
+	}
+
+	.state-online,
+	.state-up,
+	.state-cleared {
+		color: #38df55;
+	}
+
+	.state-offline,
+	.state-down,
+	.state-firing {
+		color: #ff3b30;
+	}
+
+	.state-pending {
+		color: #ffcf33;
+	}
+
+	.state-maintenance,
+	.state-unknown {
+		color: #c0c0c0;
+	}
+
 	.wide.enhanced & {
+		width: calc(p.$wide-width - 2 * p.$blue-box-margin - 4px);
+
 		.chart-grid {
 			gap: 5px 14px;
 			padding: 0 24px;
 		}
+
+		.status-list,
+		.list-summary {
+			padding-left: 24px;
+			padding-right: 24px;
+		}
 	}
 
 	.portrait.enhanced & {
+		height: p.$portrait-scroll-height;
+
+		.observability-heading {
+			height: 68px;
+		}
+
 		.entity-name {
 			font-size: 26px;
 			padding-top: 20px;
@@ -262,6 +676,7 @@
 			gap: 12px 14px;
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 			grid-template-rows: repeat(2, minmax(0, 1fr));
+			height: 899px;
 			padding: 20px 20px 0;
 		}
 
@@ -289,6 +704,7 @@
 		}
 
 		.log-volume {
+			height: 541px;
 			margin: 70px 30px 0;
 
 			.trend-chart {

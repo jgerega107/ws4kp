@@ -1,5 +1,5 @@
 <div class="header">
-	<div class="logo"><img src="images/logos/logo-corner.png" /></div>
+	<div class="logo<%= locals?.logoClass ? ` ${locals.logoClass}` : '' %>"><img src="<%= locals?.logoSrc ?? 'images/logos/logo-corner.png' %>" alt="<%= locals?.logoAlt ?? '' %>" /></div>
 	<% if (locals?.titleDual) { %>
 		<div class="title dual">
 			<div class="top">

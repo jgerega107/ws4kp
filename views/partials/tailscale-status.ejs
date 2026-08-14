@@ -1,0 +1,19 @@
+<%- include('header.ejs', {
+  titleDual:{ top: 'Tailnet' , bottom: 'Node Status' },
+  hasTime: true,
+  logoSrc: 'images/observability/eggman-console.png',
+  logoAlt: 'Eggman system operator',
+  logoClass: 'observability-logo'
+}) %>
+<div class="main has-scroll has-box observability status-panel tailscale-status can-enhance">
+  <div class="list-summary">
+    <span class="page-label">Tailnet Devices</span>
+    <span class="online-summary"></span>
+  </div>
+  <div class="status-list">
+    <div class="status-list-header tailscale-columns">
+      <span>Node</span><span>Status</span><span>Version</span>
+    </div>
+    <div class="status-list-rows"></div>
+  </div>
+</div>

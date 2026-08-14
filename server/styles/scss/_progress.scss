@@ -13,22 +13,30 @@
 	}
 
 	.container {
+		box-sizing: border-box;
+		column-gap: 12px;
+		display: grid;
+		font-size: 13px;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		height: p.$standard-scroll-height;
+		line-height: 21px;
+		margin: 0 10px;
+		overflow: hidden;
+		padding-bottom: 6px;
 		position: relative;
 		top: 15px;
-		margin: 0px 10px;
-		box-sizing: border-box;
-		height: p.$standard-scroll-height;
-		overflow: hidden;
-		line-height: 21px;
 
 		.portrait.enhanced & {
 			// variable height to keep the progress bar visible
+			display: block;
 			height: unset;
 			font-size: 25px;
 			line-height: 34px;
 		}
 
 		.item {
+			min-width: 0;
+			overflow: hidden;
 			position: relative;
 
 			.name {
@@ -40,10 +48,15 @@
 			}
 
 			.links {
+				font-size: 12px;
 				position: absolute;
 				text-align: right;
 				right: 0px;
 				top: 0px;
+
+				.portrait.enhanced & {
+					font-size: inherit;
+				}
 
 				>div {
 					background-color: c.$blue-box;

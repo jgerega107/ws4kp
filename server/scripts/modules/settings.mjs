@@ -13,6 +13,7 @@ const hiddenSettings = [
 
 	// wide, portrait and enhanced are handled by a dropdown which sets these individual settings accordingly
 	'wide',
+	'wide-16-10',
 	'portrait',
 	'enhanced',
 ];
@@ -56,6 +57,17 @@ const portraitChange = (value) => {
 	window.dispatchEvent(new Event('resize'));
 };
 
+const wide16x10Change = (value) => {
+	const container = document.querySelector('#divTwc');
+	if (!container) {
+		if (value) deferredDomSettings.add('wide16x10');
+		return;
+	}
+
+	container.classList.toggle('wide-16-10', value);
+	window.dispatchEvent(new Event('resize'));
+};
+
 const enhancedChange = (value) => {
 	const container = document.querySelector('#divTwc');
 	if (!container) {
@@ -78,23 +90,33 @@ const enhancedChange = (value) => {
 const viewModeChange = (value) => {
 	// set the appropriate mode bits which triggers change actions above
 	switch (value) {
+		case 'wide-16-10':
+			settings.wide.value = true;
+			settings.wide16x10.value = true;
+			settings.enhanced.value = false;
+			settings.portrait.value = false;
+			break;
 		case 'wide':
 			settings.wide.value = true;
+			settings.wide16x10.value = false;
 			settings.enhanced.value = false;
 			settings.portrait.value = false;
 			break;
 		case 'wide-enhanced':
 			settings.wide.value = true;
+			settings.wide16x10.value = false;
 			settings.enhanced.value = true;
 			settings.portrait.value = false;
 			break;
 		case 'portrait-enhanced':
 			settings.wide.value = false;
+			settings.wide16x10.value = false;
 			settings.enhanced.value = true;
 			settings.portrait.value = true;
 			break;
 		default:
 			settings.wide.value = false;
+			settings.wide16x10.value = false;
 			settings.enhanced.value = false;
 			settings.portrait.value = false;
 	}
@@ -200,6 +222,12 @@ const init = () => {
 		changeAction: wideScreenChange,
 		sticky: true,
 	});
+	settings.wide16x10 = new Setting('wide-16-10', {
+		name: 'Widescreen 1440x900',
+		defaultValue: false,
+		changeAction: wide16x10Change,
+		sticky: true,
+	});
 	settings.portrait = new Setting('portrait', {
 		name: 'Allow Portrait',
 		changeAction: portraitChange,
@@ -220,6 +248,7 @@ const init = () => {
 	if (settings.wide.value && !settings.enhanced.value) viewModeDefault = 'wide';
 	if (settings.wide.value && settings.enhanced.value) viewModeDefault = 'wide-enhanced';
 	if (settings.portrait.value) viewModeDefault = 'portrait-enhanced';
+	if (settings.wide16x10.value) viewModeDefault = 'wide-16-10';
 	settings.viewMode = new Setting('viewMode', {
 		name: 'Display mode',
 		type: 'select',
@@ -229,6 +258,7 @@ const init = () => {
 		values: [
 			['standard', 'Standard'],
 			['wide', 'Widescreen'],
+			['wide-16-10', 'Widescreen 1440x900'],
 			['wide-enhanced', 'Widescreen enhanced'],
 			['portrait-enhanced', 'Portrait enhanced'],
 		],

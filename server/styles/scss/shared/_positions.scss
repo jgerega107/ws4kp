@@ -15,6 +15,10 @@ $wide-padding: 107px;
 $wide-margin: 107px;
 $wide-width: 854px;
 
+// 16:10 canvas; scales exactly to 1440x900 at 1.875x
+$wide-16-10-margin: 64px;
+$wide-16-10-width: 768px;
+
 // portrait positioning
 $portrait-width: 640px;
 $portrait-height: 1137px;

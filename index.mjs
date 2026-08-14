@@ -12,6 +12,7 @@ import devTools from './src/com.chrome.devtools.mjs';
 import {
 	createObservabilityHandlers, getObservabilityConfig,
 } from './proxy/observability.mjs';
+import { createUnifiHandlers } from './proxy/unifi-observability.mjs';
 
 const travelCities = JSON.parse(await readFile('./datagenerators/output/travelcities.json'));
 const regionalCities = JSON.parse(await readFile('./datagenerators/output/regionalcities.json'));
@@ -19,11 +20,13 @@ const stationInfo = JSON.parse(await readFile('./datagenerators/output/stations.
 
 const app = express();
 const port = process.env.WS4KP_PORT ?? 8080;
+const host = process.env.WS4KP_HOST ?? '0.0.0.0';
 const serverAvailable = !process.env?.STATIC;
 const observabilityConfig = serverAvailable ? getObservabilityConfig() : {};
 const observabilityAvailability = {
 	prometheus: serverAvailable && !!observabilityConfig.prometheusUrl,
 	loki: serverAvailable && !!observabilityConfig.lokiUrl,
+	tailscale: serverAvailable && !!observabilityConfig.tailscaleToken,
 };
 
 // Set X-Weatherstar header globally for playlist fallback detection
@@ -145,13 +148,24 @@ if (!process.env?.STATIC) {
 	app.use('/forecast/', forecastProxy);
 
 	const observabilityHandlers = createObservabilityHandlers(observabilityConfig);
+	const unifiHandlers = createUnifiHandlers(observabilityConfig.prometheusUrl);
 	if (observabilityAvailability.prometheus) {
 		app.get('/observability/system', observabilityHandlers.system);
+		app.get('/observability/alerts', observabilityHandlers.alerts);
+		app.get('/observability/unifi/network-overview', unifiHandlers.networkOverview);
+		app.get('/observability/unifi/wan-performance', unifiHandlers.wanPerformance);
+		app.get('/observability/unifi/wifi-health', unifiHandlers.wifiHealth);
+		app.get('/observability/unifi/device-health', unifiHandlers.deviceHealth);
+		app.get('/observability/unifi/switch-ports', unifiHandlers.switchPorts);
+		app.get('/observability/unifi/traffic-insights', unifiHandlers.trafficInsights);
+		app.get('/observability/unifi/network-capacity', unifiHandlers.networkCapacity);
 	}
 	if (observabilityAvailability.loki) {
 		app.get('/observability/reverse-proxy', observabilityHandlers.reverseProxy);
 	}
-
+	if (observabilityAvailability.tailscale) {
+		app.get('/observability/tailscale', observabilityHandlers.tailscale);
+	}
 	// Playlist route is available in server mode (not in static mode)
 	app.get('/playlist.json', playlist);
 }
@@ -194,8 +208,8 @@ if (process.env?.DIST === '1') {
 	app.get('*name', express.static('./server', staticOptions));
 }
 
-const server = app.listen(port, () => {
-	console.log(`Server listening on port ${port}`);
+const server = app.listen(port, host, () => {
+	console.log(`Server listening on http://${host}:${port}`);
 });
 
 // graceful shutdown

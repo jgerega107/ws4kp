@@ -1,6 +1,14 @@
-<%- include('header.ejs', {titleDual:{ top: 'System' , bottom: 'Information' }, hasTime: true}) %>
+<%- include('header.ejs', {
+  titleDual:{ top: 'System' , bottom: 'Information' },
+  hasTime: true,
+  logoSrc: 'images/observability/eggman-console.png',
+  logoAlt: 'Eggman system operator',
+  logoClass: 'observability-logo'
+}) %>
 <div class="main has-scroll has-box observability system-information can-enhance">
-  <div class="entity-name"></div>
+  <div class="observability-heading">
+    <div class="entity-name"></div>
+  </div>
   <div class="chart-grid">
     <div class="metric-card cpu-card">
       <div class="chart-heading"><span>CPU / 1H</span><span class="cpu-value"></span></div>

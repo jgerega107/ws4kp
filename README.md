@@ -57,6 +57,10 @@ If you would like to display weather information for international locations (ou
 
 WeatherStar 4000+ supports two deployment modes:
 
+Development and server builds use Node.js 26.7.0 and npm 12.0.2. The included `.nvmrc` selects the matching Node release when using nvm, and the Docker builds install the matching npm release.
+
+The server listens on `0.0.0.0:8080` by default so Podman ports published from WSL are reachable from Windows. Set `WS4KP_HOST` or `WS4KP_PORT` to override either value.
+
 ### Server Deployment (Recommended)
 
 * Includes Node.js server with caching proxy for better performance (especially when running on a local server for multiple clients)
@@ -240,24 +244,32 @@ When using the Docker container, these environment variables are read on contain
 
 ### Observability displays
 
-The Express server deployment can add two opt-in monitoring displays to the normal WeatherStar playlist. These displays are not available in the static nginx deployment because their backing services are queried by the Node.js server.
+The Express server deployment can add opt-in monitoring displays to the normal WeatherStar playlist. These displays are not available in the static nginx deployment because the Node.js server performs every upstream request. Backend URLs, access tokens, PromQL, and LogQL are never sent to the browser.
 
-Set either or both of these environment variables before starting the server:
+Set the environment variables for the services you want to enable before starting the server:
 
 ```bash
 WS4KP_PROMETHEUS_URL=http://prometheus:9090
 WS4KP_LOKI_URL=http://loki:3100
+WS4KP_TAILSCALE_API_TOKEN=tskey-api-example
+WS4KP_TAILSCALE_TAILNET=-
 ```
 
-`WS4KP_PROMETHEUS_URL` enables a system information display using standard node-exporter metrics. It graphs the previous hour of five-minute CPU usage, memory usage, all persistent filesystem usage, and maximum reported hardware temperature, with a separate screen for each Prometheus `instance` label. Each disk is shown as a separately colored line identified by mount point.
+`WS4KP_PROMETHEUS_URL` enables two displays:
 
-`WS4KP_LOKI_URL` enables a reverse proxy information display. It graphs one-minute log-volume buckets across the previous hour using the Loki stream label `upstream`, with a separate screen for each upstream. This matches Grafana Logs Drilldown's auto-interval approach for a fixed one-hour range. The built-in query is:
+- System information uses standard node-exporter metrics. It graphs the previous hour of five-minute CPU usage, memory usage, all persistent filesystem usage, and maximum reported hardware temperature, with a separate screen for each Prometheus `instance` label. Each disk is shown as a separately colored line identified by mount point.
+- Alert history queries the `ALERTS{alertstate="firing"}` series over the previous 24 hours. It shows both currently firing and cleared alerts, their source, and the total time each series spent firing.
+
+`WS4KP_LOKI_URL` enables a reverse proxy information display. It graphs one-minute response-volume buckets across the previous hour using the Loki stream label `upstream`, with a separate screen for each upstream. Caddy JSON access logs are split into green `2xx/3xx` and red `4xx/5xx` series. The built-in queries are:
 
 ```logql
-sum by (upstream) (count_over_time({upstream=~".+"}[1m]))
+sum by (upstream) (count_over_time({upstream=~".+"} | json | status >= 200 | status < 400 [1m]))
+sum by (upstream) (count_over_time({upstream=~".+"} | json | status >= 400 | status < 600 [1m]))
 ```
 
-Both displays start unchecked, refresh once per minute when enabled, and load after the normal weather location has been selected. Prometheus and Loki URLs may use HTTP or HTTPS; authenticated endpoints are not currently supported.
+`WS4KP_TAILSCALE_API_TOKEN` enables a Tailscale node-status display using the read-only devices API. It shows each node's name, online/offline state, and client version. `WS4KP_TAILSCALE_TAILNET` defaults to Tailscale's `-` shorthand for the token's own tailnet. `WS4KP_TAILSCALE_API_URL` can override the default `https://api.tailscale.com` base URL.
+
+All observability displays start unchecked, refresh once per minute when enabled, and load after the normal weather location has been selected. Upstream URLs may use HTTP or HTTPS. Prometheus and Loki authenticated endpoints are not currently supported.
 
 ## Settings
 
@@ -266,6 +278,7 @@ Both displays start unchecked, refresh once per minute when enabled, and load af
 **Display Mode:**
 - Standard: Classic 4:3 display with the classic (not enhanced, below) screen layouts.
 - Widescreen: Stretches the background to 16:9 to avoid "pillarboxing" on modern displays
+- Widescreen 1440x900: Uses a 16:10 canvas that scales exactly to 1440x900 in fullscreen or kiosk mode.
 - Widescreen Enhanced: Stretches as above, and makes use of the additional space to provide wider maps, more weather data and/or additional days in the forecast
 - Portrait Enhanced: (in progress) Rotates the screen to a 16:9 portrait orientation and enhances the original displays by adjusting them to fit the new orientation and filling with additional data where possible
 

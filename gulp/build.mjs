@@ -58,6 +58,9 @@ const webpackOptions = {
 				'./server/scripts/modules/travelforecast.mjs',
 				'./server/scripts/modules/system-information.mjs',
 				'./server/scripts/modules/reverse-proxy-information.mjs',
+				'./server/scripts/modules/tailscale-status.mjs',
+				'./server/scripts/modules/alert-history.mjs',
+				'./server/scripts/modules/unifi-dashboards.mjs',
 			],
 			dependOn: 'shared',
 		},
@@ -125,6 +128,9 @@ const mjsSources = [
 	'server/scripts/modules/travelforecast.mjs',
 	'server/scripts/modules/system-information.mjs',
 	'server/scripts/modules/reverse-proxy-information.mjs',
+	'server/scripts/modules/tailscale-status.mjs',
+	'server/scripts/modules/alert-history.mjs',
+	'server/scripts/modules/unifi-dashboards.mjs',
 	'server/scripts/modules/progress.mjs',
 	'server/scripts/modules/media.mjs',
 	'server/scripts/modules/custom-scroll-text.mjs',
@@ -163,7 +169,9 @@ const compressHtml = async () => {
 			version,
 			OVERRIDES,
 			query: {},
-			observability: { prometheus: false, loki: false },
+			observability: {
+				prometheus: false, loki: false, tailscale: false,
+			},
 			assetVersion: version,
 		}))
 		.pipe(rename({ extname: '.html' }))

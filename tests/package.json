@@ -3,6 +3,11 @@
 	"version": "1.0.0",
 	"description": "Currently, tests take a different approach from typical unit testing. The test methodology loads several forecasts for different locations and logs them all to one logger so errors can be found such as missing icons, locations that do not have all of the necessary data or other changes that may occur between geographical locations.",
 	"main": "index.mjs",
+	"packageManager": "npm@12.0.2",
+	"engines": {
+		"node": ">=26.7.0",
+		"npm": ">=12.0.2"
+	},
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
@@ -10,7 +15,10 @@
 	"license": "MIT",
 	"dependencies": {
 		"chalk": "^6.0.0",
-		"puppeteer": "^25.4.0"
+		"puppeteer": "^25.7.0"
+	},
+	"allowScripts": {
+		"puppeteer@25.7.0": true
 	},
 	"type": "module"
 }

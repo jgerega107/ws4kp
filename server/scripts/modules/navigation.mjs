@@ -393,7 +393,7 @@ const scaling = () => {
 	};
 
 	if (settings.wide?.value) {
-		BASE_SIZE.width = 640 + 107 + 107;
+		BASE_SIZE.width = settings.wide16x10?.value ? 768 : 640 + 107 + 107;
 	}
 
 	if (settings.portrait?.value) {
@@ -776,7 +776,9 @@ const applyScanlineScaling = (scale) => {
 		const visualThickness = scanlineDebugInfo.visual || actualRendered; // Use visual thickness if available
 
 		console.log(`↕️ Scanline optimization: ${cssThickness} CSS × ${scale.toFixed(3)} scale = ${actualRendered.toFixed(3)}px rendered (${visualThickness}px visual target) × ${devicePixelRatio}x DPI = ${physicalRendered.toFixed(3)}px physical - ${scanlineDebugInfo.reason}`);
-		console.log(`↕️  Display: ${viewportWidth}×${viewportHeight}, Scale factors: width=${(window.innerWidth / (settings.wide.value ? 854 : 640)).toFixed(3)}, height=${(window.innerHeight / 480).toFixed(3)}, DPR=${devicePixelRatio}`);
+		let displayWidth = 640;
+		if (settings.wide.value) displayWidth = settings.wide16x10?.value ? 768 : 854;
+		console.log(`↕️  Display: ${viewportWidth}×${viewportHeight}, Scale factors: width=${(window.innerWidth / displayWidth).toFixed(3)}, height=${(window.innerHeight / 480).toFixed(3)}, DPR=${devicePixelRatio}`);
 		console.log(`↕️  Thickness: CSS=${cssThickness}, Visual=${visualThickness.toFixed(1)}px, Rendered=${actualRendered.toFixed(3)}px, Physical=${physicalRendered.toFixed(3)}px`);
 	}
 };

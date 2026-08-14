@@ -11,6 +11,9 @@ services:
       # attached to the same Compose network.
       WS4KP_PROMETHEUS_URL: ${PROMETHEUS_URL:-http://host.docker.internal:9090}
       WS4KP_LOKI_URL: ${LOKI_URL:-http://host.docker.internal:3100}
+      # Optional server-side integrations. Leave unset to omit their panels.
+      WS4KP_TAILSCALE_API_TOKEN: ${TAILSCALE_API_TOKEN:-}
+      WS4KP_TAILSCALE_TAILNET: ${TAILSCALE_TAILNET:-}
     extra_hosts:
       # Makes host.docker.internal available on Linux as well as Docker Desktop.
       - host.docker.internal:host-gateway

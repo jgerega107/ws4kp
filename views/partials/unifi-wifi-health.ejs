@@ -1,0 +1,28 @@
+<%- include('header.ejs', {
+  titleDual:{ top: 'UniFi' , bottom: 'WiFi Health' },
+  hasTime: true,
+  logoSrc: 'images/observability/eggman-console.png',
+  logoAlt: 'Eggman system operator',
+  logoClass: 'observability-logo'
+}) %>
+<div class="main has-scroll has-box observability unifi-wifi-health can-enhance">
+  <div class="observability-heading"><div class="entity-name"></div></div>
+  <div class="chart-grid">
+    <div class="metric-card metric-blue">
+      <div class="chart-heading"><span>Signal / 1H</span><span class="signal-value"></span></div>
+      <div class="trend-chart signal-chart"></div>
+    </div>
+    <div class="metric-card metric-green">
+      <div class="chart-heading"><span>Satisfaction / 1H</span><span class="satisfaction-value"></span></div>
+      <div class="trend-chart satisfaction-chart"></div>
+    </div>
+    <div class="metric-card metric-yellow legend-bottom wide-axis">
+      <div class="chart-heading"><span>Client Traffic / 1H</span><span class="traffic-value"></span></div>
+      <div class="trend-chart traffic-chart"></div>
+    </div>
+    <div class="metric-card metric-purple legend-bottom">
+      <div class="chart-heading"><span>Clients by Band</span><span class="band-value"></span></div>
+      <div class="trend-chart band-chart"></div>
+    </div>
+  </div>
+</div>

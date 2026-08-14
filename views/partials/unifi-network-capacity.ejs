@@ -1,0 +1,28 @@
+<%- include('header.ejs', {
+  titleDual:{ top: 'UniFi' , bottom: 'Network Capacity' },
+  hasTime: true,
+  logoSrc: 'images/observability/eggman-console.png',
+  logoAlt: 'Eggman system operator',
+  logoClass: 'observability-logo'
+}) %>
+<div class="main has-scroll has-box observability unifi-network-capacity can-enhance">
+  <div class="observability-heading"><div class="entity-name"></div></div>
+  <div class="chart-grid">
+    <div class="metric-card metric-yellow legend-bottom">
+      <div class="chart-heading"><span>DHCP Use / 1H</span><span class="dhcp-value"></span></div>
+      <div class="trend-chart dhcp-chart"></div>
+    </div>
+    <div class="metric-card metric-blue legend-bottom">
+      <div class="chart-heading"><span>Lease Pool / 1H</span><span class="lease-value"></span></div>
+      <div class="trend-chart lease-chart"></div>
+    </div>
+    <div class="metric-card metric-green">
+      <div class="chart-heading"><span>Link Quality / 1H</span><span class="link-value"></span></div>
+      <div class="trend-chart link-chart"></div>
+    </div>
+    <div class="metric-card metric-purple legend-bottom">
+      <div class="chart-heading"><span>Connection Mix</span><span class="connection-value"></span></div>
+      <div class="trend-chart connection-chart"></div>
+    </div>
+  </div>
+</div>

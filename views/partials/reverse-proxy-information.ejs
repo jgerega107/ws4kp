@@ -1,6 +1,14 @@
-<%- include('header.ejs', {titleDual:{ top: 'Reverse Proxy' , bottom: 'Request Volume' }, hasTime: true}) %>
+<%- include('header.ejs', {
+  titleDual:{ top: 'Request Volume' , bottom: 'per Host' },
+  hasTime: true,
+  logoSrc: 'images/observability/eggman-console.png',
+  logoAlt: 'Eggman system operator',
+  logoClass: 'observability-logo'
+}) %>
 <div class="main has-scroll has-box observability reverse-proxy-information can-enhance">
-  <div class="entity-name"></div>
+  <div class="observability-heading">
+    <div class="entity-name"></div>
+  </div>
   <div class="log-volume">
     <div class="chart-heading"><span>Requests over 1H</span><span class="log-count"></span></div>
     <div class="trend-chart log-chart"></div>
