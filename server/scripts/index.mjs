@@ -12,6 +12,7 @@ import { debugFlag } from './modules/utils/debug.mjs';
 import { parseQueryString } from './modules/utils/setting.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
+	document.addEventListener('keydown', documentKeydown);
 	init();
 	getCustomCode();
 });
@@ -37,16 +38,22 @@ const init = async () => {
 		await loadAllData(typeof OVERRIDES !== 'undefined' && OVERRIDES.VERSION ? OVERRIDES.VERSION : '');
 	} catch (error) {
 		console.error('Failed to load core application data:', error);
-		// Show error message to user and halt initialization
-		document.body.innerHTML = `
-			<div>
+		// Keep the display and listeners intact, and recover without operator input.
+		let errorMessage = document.querySelector('#startup-error');
+		if (!errorMessage) {
+			errorMessage = document.createElement('div');
+			errorMessage.id = 'startup-error';
+			errorMessage.setAttribute('role', 'status');
+			document.querySelector('#divTwc').append(errorMessage);
+		}
+		errorMessage.innerHTML = `
 				<h2>Unable to load Weather Data</h2>
-				<p>The application cannot start because core data failed to load.</p>
-				<p>Please check your connection and try refreshing.</p>
-			</div>
+				<p>Retrying automatically in 30 seconds. Press Ctrl+K for settings.</p>
 		`;
-		return; // Stop initialization
+		setTimeout(init, 30_000);
+		return;
 	}
+	document.querySelector('#startup-error')?.remove();
 
 	document.querySelector(TXT_ADDRESS_SELECTOR).addEventListener('focus', (e) => {
 		e.target.select();
@@ -77,7 +84,6 @@ const init = async () => {
 
 	document.querySelector('#btnGetLatLng').addEventListener('click', () => autoComplete.directFormSubmit());
 
-	document.addEventListener('keydown', documentKeydown);
 	document.addEventListener('touchmove', (e) => { if (document.fullscreenElement) e.preventDefault(); });
 
 	const autoComplete = new AutoComplete(document.querySelector(TXT_ADDRESS_SELECTOR), {
@@ -140,18 +146,8 @@ const init = async () => {
 		btnGetGpsClick();
 	}
 
-	// Handle kiosk mode initialization
+	// Settings owns URL/default/persistence resolution.
 	const urlKioskCheckbox = parsedParameters?.kiosk ?? parsedParameters['settings-kiosk-checkbox'];
-
-	// If kiosk=false is specified, disable kiosk mode and clear any stored value
-	if (urlKioskCheckbox === 'false') {
-		settings.kiosk.value = false;
-		// Clear stored value by using conditional storage with false
-		settings.kiosk.conditionalStoreToLocalStorage(false, false);
-	} else if (urlKioskCheckbox === 'true') {
-		// if kiosk mode was set via the query string, enable it
-		settings.kiosk.value = true;
-	}
 
 	// Auto-play logic: also play immediately if kiosk mode is enabled
 	const play = settings.kiosk.value || urlKioskCheckbox === 'true' ? 'true' : localStorage.getItem('play');
@@ -395,17 +391,18 @@ const updateFullScreenNavigate = () => {
 const documentKeydown = (e) => {
 	const { key } = e;
 
-	// Handle Ctrl+K to exit kiosk mode (even when other modifiers would normally be ignored)
-	if (e.ctrlKey && (key === 'k' || key === 'K')) {
+	// Toggle kiosk without a mouse, including while startup data is unavailable.
+	if (e.ctrlKey && !e.altKey && !e.metaKey && (key === 'k' || key === 'K')) {
 		e.preventDefault();
-		if (settings.kiosk?.value) {
-			settings.kiosk.value = false;
-		}
+		if (e.repeat) return false;
+		settings.kiosk.value = !settings.kiosk.value;
+		if (!settings.kiosk.value) document.querySelector(TXT_ADDRESS_SELECTOR)?.focus();
 		return false;
 	}
 
 	// don't trigger on ctrl/alt/shift modified key for other shortcuts
-	if (e.altKey || e.ctrlKey || e.shiftKey) return false;
+	if (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) return false;
+	if (e.target?.closest('input, textarea, select, button, [contenteditable="true"]')) return false;
 
 	if (document.fullscreenElement || document.activeElement === document.body) {
 		switch (key) {

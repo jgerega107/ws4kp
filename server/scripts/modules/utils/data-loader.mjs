@@ -10,7 +10,7 @@ const loadData = async (dataType, version = '') => {
 
 	try {
 		const url = `/data/${dataType}.json${version ? `?_=${version}` : ''}`;
-		const response = await fetch(url);
+		const response = await fetch(url, { signal: AbortSignal.timeout(15_000) });
 
 		if (!response.ok) {
 			throw new Error(`Failed to load ${dataType}: ${response.status}`);

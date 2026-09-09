@@ -21,19 +21,12 @@ const stationInfo = JSON.parse(await readFile('./datagenerators/output/stations.
 const app = express();
 const port = process.env.WS4KP_PORT ?? 8080;
 const host = process.env.WS4KP_HOST ?? '0.0.0.0';
-const serverAvailable = !process.env?.STATIC;
-const observabilityConfig = serverAvailable ? getObservabilityConfig() : {};
+const observabilityConfig = getObservabilityConfig();
 const observabilityAvailability = {
-	prometheus: serverAvailable && !!observabilityConfig.prometheusUrl,
-	loki: serverAvailable && !!observabilityConfig.lokiUrl,
-	tailscale: serverAvailable && !!observabilityConfig.tailscaleToken,
+	prometheus: !!observabilityConfig.prometheusUrl,
+	loki: !!observabilityConfig.lokiUrl,
+	tailscale: !!observabilityConfig.tailscaleToken,
 };
-
-// Set X-Weatherstar header globally for playlist fallback detection
-app.use((req, res, next) => {
-	res.setHeader('X-Weatherstar', 'true');
-	next();
-});
 
 // template engine
 app.set('view engine', 'ejs');
@@ -68,7 +61,6 @@ const defaultSearchParams = (new URLSearchParams(qsVars)).toString();
 const renderIndex = (req, res, production = false) => {
 	res.render('index', {
 		production,
-		serverAvailable, // Disable caching proxy server in static mode
 		version,
 		OVERRIDES,
 		query: req.query,
@@ -87,7 +79,7 @@ const index = (req, res) => {
 		return;
 	}
 	// return the EJS template page in development mode (serve files from server directory directly)
-	renderIndex(req, res, false);
+	renderIndex(req, res, process.env?.DIST === '1');
 };
 
 const geoip = (req, res) => {
@@ -130,45 +122,41 @@ const staticOptions = {
 };
 
 // Weather.gov API proxy (catch-all for any Weather.gov API endpoint)
-// Skip setting up routes for the caching proxy server in static mode
-if (!process.env?.STATIC) {
-	app.use('/api/', weatherProxy);
+app.use('/api/', weatherProxy);
 
-	// Cache management DELETE endpoint to allow "uncaching" specific URLs
-	app.delete(/^\/cache\/.*/, (req, res) => {
-		const path = req.url.replace('/cache', '');
-		const cleared = cache.clearEntry(path);
-		res.json({ cleared, path });
-	});
+// Cache management DELETE endpoint to allow "uncaching" specific URLs
+app.delete(/^\/cache\/.*/, (req, res) => {
+	const path = req.url.replace('/cache', '');
+	const cleared = cache.clearEntry(path);
+	res.json({ cleared, path });
+});
 
-	// specific proxies for other services
-	app.use('/radar/', radarProxy);
-	app.use('/spc/', outlookProxy);
-	app.use('/mesonet/', mesonetProxy);
-	app.use('/forecast/', forecastProxy);
+// specific proxies for other services
+app.use('/radar/', radarProxy);
+app.use('/spc/', outlookProxy);
+app.use('/mesonet/', mesonetProxy);
+app.use('/forecast/', forecastProxy);
 
-	const observabilityHandlers = createObservabilityHandlers(observabilityConfig);
-	const unifiHandlers = createUnifiHandlers(observabilityConfig.prometheusUrl);
-	if (observabilityAvailability.prometheus) {
-		app.get('/observability/system', observabilityHandlers.system);
-		app.get('/observability/alerts', observabilityHandlers.alerts);
-		app.get('/observability/unifi/network-overview', unifiHandlers.networkOverview);
-		app.get('/observability/unifi/wan-performance', unifiHandlers.wanPerformance);
-		app.get('/observability/unifi/wifi-health', unifiHandlers.wifiHealth);
-		app.get('/observability/unifi/device-health', unifiHandlers.deviceHealth);
-		app.get('/observability/unifi/switch-ports', unifiHandlers.switchPorts);
-		app.get('/observability/unifi/traffic-insights', unifiHandlers.trafficInsights);
-		app.get('/observability/unifi/network-capacity', unifiHandlers.networkCapacity);
-	}
-	if (observabilityAvailability.loki) {
-		app.get('/observability/reverse-proxy', observabilityHandlers.reverseProxy);
-	}
-	if (observabilityAvailability.tailscale) {
-		app.get('/observability/tailscale', observabilityHandlers.tailscale);
-	}
-	// Playlist route is available in server mode (not in static mode)
-	app.get('/playlist.json', playlist);
+const observabilityHandlers = createObservabilityHandlers(observabilityConfig);
+const unifiHandlers = createUnifiHandlers(observabilityConfig.prometheusUrl);
+if (observabilityAvailability.prometheus) {
+	app.get('/observability/system', observabilityHandlers.system);
+	app.get('/observability/alerts', observabilityHandlers.alerts);
+	app.get('/observability/unifi/network-overview', unifiHandlers.networkOverview);
+	app.get('/observability/unifi/wan-performance', unifiHandlers.wanPerformance);
+	app.get('/observability/unifi/wifi-health', unifiHandlers.wifiHealth);
+	app.get('/observability/unifi/device-health', unifiHandlers.deviceHealth);
+	app.get('/observability/unifi/switch-ports', unifiHandlers.switchPorts);
+	app.get('/observability/unifi/traffic-insights', unifiHandlers.trafficInsights);
+	app.get('/observability/unifi/network-capacity', unifiHandlers.networkCapacity);
 }
+if (observabilityAvailability.loki) {
+	app.get('/observability/reverse-proxy', observabilityHandlers.reverseProxy);
+}
+if (observabilityAvailability.tailscale) {
+	app.get('/observability/tailscale', observabilityHandlers.tailscale);
+}
+app.get('/playlist.json', playlist);
 
 // Data endpoints - serve JSON data with long-term caching
 const dataEndpoints = {
@@ -195,7 +183,8 @@ if (process.env?.DIST === '1') {
 	app.use('/music', express.static('./server/music', staticOptions));
 
 	// render the EJS template in production mode (serve compressed files from dist directory)
-	app.get('/', (req, res) => { renderIndex(req, res, true); });
+	app.get('/', index);
+	app.get('/index.html', index);
 
 	app.use('/', express.static('./dist', staticOptions));
 } else {

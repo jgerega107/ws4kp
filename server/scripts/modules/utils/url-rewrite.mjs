@@ -16,11 +16,6 @@ const rewriteUrl = (_url) => {
 	// Convert to URL object (for URL objects, creates a copy to avoid mutating the original)
 	const url = new URL(_url);
 
-	if (!window.WS4KP_SERVER_AVAILABLE) {
-		// If running standalone in the browser, simply return a URL object without rewriting
-		return url;
-	}
-
 	// Rewrite the origin to use local proxy server
 	if (url.origin === 'https://api.weather.gov') {
 		url.protocol = window.location.protocol;

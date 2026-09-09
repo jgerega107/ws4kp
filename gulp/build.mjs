@@ -4,21 +4,14 @@ import {
 } from 'gulp';
 import concat from 'gulp-concat';
 import terser from 'gulp-terser';
-import ejs from 'gulp-ejs';
 import rename from 'gulp-rename';
-import htmlmin from 'gulp-html-minifier-terser';
 import { deleteAsync } from 'del';
 import webpack from 'webpack-stream';
 import TerserPlugin from 'terser-webpack-plugin';
 import { readFile } from 'fs/promises';
-import file from 'gulp-file';
 import * as dartSass from 'sass';
 import gulpSass from 'gulp-sass';
 import log from 'fancy-log';
-import OVERRIDES from '../src/overrides.mjs';
-
-// get cloudfront
-import reader from '../src/playlist-reader.mjs';
 
 const sass = gulpSass(dartSass);
 
@@ -149,10 +142,6 @@ const buildCss = () => src(cssSources, { sourcemaps: true })
 	.pipe(rename({ suffix: '.min' }))
 	.pipe(dest(RESOURCES_PATH, { sourcemaps: '.' }));
 
-const htmlSources = [
-	'views/*.ejs',
-];
-
 const getVersion = async () => {
 	const packageJson = await readFile('package.json');
 	const packageVersion = JSON.parse(packageJson).version;
@@ -160,39 +149,12 @@ const getVersion = async () => {
 	return process.env.WS4KP_VERSION ?? packageVersion;
 };
 
-const compressHtml = async () => {
-	const version = await getVersion();
-	return src(htmlSources)
-		.pipe(ejs({
-			production: version,
-			serverAvailable: false,
-			version,
-			OVERRIDES,
-			query: {},
-			observability: {
-				prometheus: false, loki: false, tailscale: false,
-			},
-			assetVersion: version,
-		}))
-		.pipe(rename({ extname: '.html' }))
-		.pipe(htmlmin({ collapseWhitespace: true }))
-		.pipe(dest('./dist'));
-};
-
 const otherFiles = [
 	'server/robots.txt',
 	'server/manifest.json',
-	'server/music/**/*.mp3',
 ];
 const copyOtherFiles = () => src(otherFiles, { base: 'server/', encoding: false })
 	.pipe(dest('./dist'));
-
-// Copy JSON data files for static hosting
-const copyDataFiles = () => src([
-	'datagenerators/output/travelcities.json',
-	'datagenerators/output/regionalcities.json',
-	'datagenerators/output/stations.json',
-]).pipe(dest('./dist/data'));
 
 const imageSources = [
 	'server/fonts/**',
@@ -203,17 +165,11 @@ const imageSources = [
 const copyImageSources = () => src(imageSources, { base: './server', encoding: false })
 	.pipe(dest('./dist'));
 
-const buildPlaylist = async () => {
-	const availableFiles = await reader();
-	const playlist = { availableFiles };
-	return file('playlist.json', JSON.stringify(playlist)).pipe(dest('./dist'));
-};
-
 const logVersion = async () => {
 	log(`Built version: ${await getVersion()}`);
 };
 
-const buildDist = series(clean, parallel(buildJs, compressJsVendor, buildCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist), logVersion);
+const buildDist = series(clean, parallel(buildJs, compressJsVendor, buildCss, copyOtherFiles, copyImageSources), logVersion);
 
 export default buildDist;
 

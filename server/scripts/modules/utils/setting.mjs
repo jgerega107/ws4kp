@@ -1,5 +1,23 @@
 const SETTINGS_KEY = 'Settings';
 
+// Locked-down profiles can deny storage access or contain malformed settings.
+const readSettings = () => {
+	try {
+		const value = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}');
+		return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+	} catch {
+		return {};
+	}
+};
+
+const writeSettings = (value) => {
+	try {
+		localStorage.setItem(SETTINGS_KEY, JSON.stringify(value));
+	} catch {
+		// Keep settings usable for this session when persistence is unavailable.
+	}
+};
+
 const DEFAULTS = {
 	shortName: undefined,
 	name: undefined,
@@ -201,48 +219,26 @@ class Setting {
 
 	storeToLocalStorage(value) {
 		if (!this.sticky) return;
-		const allSettingsString = localStorage?.getItem(SETTINGS_KEY) ?? '{}';
-		const allSettings = JSON.parse(allSettingsString);
+		const allSettings = readSettings();
 		allSettings[this.shortName] = value;
-		localStorage?.setItem(SETTINGS_KEY, JSON.stringify(allSettings));
+		writeSettings(allSettings);
 	}
 
 	// Conditional storage method for stickyRead settings
 	conditionalStoreToLocalStorage(value, shouldStore) {
 		if (!this.stickyRead) return;
-		const allSettingsString = localStorage?.getItem(SETTINGS_KEY) ?? '{}';
-		const allSettings = JSON.parse(allSettingsString);
+		const allSettings = readSettings();
 
 		if (shouldStore) {
 			allSettings[this.shortName] = value;
 		} else {
 			delete allSettings[this.shortName];
 		}
-		localStorage?.setItem(SETTINGS_KEY, JSON.stringify(allSettings));
+		writeSettings(allSettings);
 	}
 
 	getFromLocalStorage() {
-		const allSettings = localStorage?.getItem(SETTINGS_KEY);
-		try {
-			if (allSettings) {
-				const storedValue = JSON.parse(allSettings)?.[this.shortName];
-				if (storedValue !== undefined) {
-					switch (this.type) {
-						case 'boolean':
-						case 'checkbox':
-						case 'select':
-						case 'string':
-							return storedValue;
-						default:
-							return null;
-					}
-				}
-			}
-		} catch (error) {
-			console.warn(`Failed to parse settings from localStorage: ${error} - allSettings=${allSettings}`);
-			localStorage?.removeItem(SETTINGS_KEY);
-		}
-		return null;
+		return readSettings()[this.shortName] ?? null;
 	}
 
 	get value() {

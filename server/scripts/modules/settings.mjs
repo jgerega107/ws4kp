@@ -134,6 +134,7 @@ const kioskChange = (value) => {
 
 	if (value) {
 		body.classList.add('kiosk');
+		document.activeElement?.blur();
 		document.querySelector('#divTwc')?.classList.add('no-cursor');
 		window.dispatchEvent(new Event('resize'));
 	} else {
@@ -263,17 +264,18 @@ const init = () => {
 			['portrait-enhanced', 'Portrait enhanced'],
 		],
 	});
+	settings.stickyKiosk = new Setting('stickyKiosk', {
+		name: 'Remember Kiosk preference',
+		defaultValue: false,
+		sticky: true,
+		changeAction: (value) => settings.kiosk?.conditionalStoreToLocalStorage(settings.kiosk.value, value),
+	});
 	settings.kiosk = new Setting('kiosk', {
 		name: 'Kiosk',
-		defaultValue: false,
+		defaultValue: true,
 		changeAction: kioskChange,
 		sticky: false,
 		stickyRead: true,
-	});
-	settings.stickyKiosk = new Setting('stickyKiosk', {
-		name: 'Sticky Kiosk',
-		defaultValue: false,
-		sticky: true,
 	});
 	settings.speed = new Setting('speed', {
 		name: 'Speed',

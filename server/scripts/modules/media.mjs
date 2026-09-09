@@ -1,4 +1,3 @@
-import { text } from './utils/fetch.mjs';
 import Setting from './utils/setting.mjs';
 import { registerHiddenSetting } from './share.mjs';
 
@@ -35,26 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	getMedia();
 });
 
-const scanMusicDirectory = async () => {
-	const parseDirectory = async (path, prefix = '') => {
-		const listing = await text(path);
-		const matches = [...listing.matchAll(/href="([^"]+\.mp3)"/gi)];
-		return matches.map((m) => `${prefix}${m[1]}`);
-	};
-
-	try {
-		let files = await parseDirectory('music/');
-		if (files.length === 0) {
-			files = await parseDirectory('music/default/', 'default/');
-		}
-		return { availableFiles: files };
-	} catch (e) {
-		console.error('Unable to scan music directory');
-		console.error(e);
-		return { availableFiles: [] };
-	}
-};
-
 const getMedia = async () => {
 	let playlistSource = '';
 
@@ -63,18 +42,14 @@ const getMedia = async () => {
 		if (response.ok) {
 			playlist = await response.json();
 			playlistSource = 'from server';
-		} else if (response.status === 404 && response.headers.get('X-Weatherstar') === 'true') {
-			// Expected behavior in static deployment mode
-			playlist = await scanMusicDirectory();
-			playlistSource = 'via directory scan (static deployment)';
 		} else {
 			playlist = { availableFiles: [] };
 			playlistSource = `failed (${response.status} ${response.statusText})`;
 		}
 	} catch (_e) {
-		// Network error or other fetch failure - fall back to directory scanning
-		playlist = await scanMusicDirectory();
-		playlistSource = 'via directory scan (after fetch failed)';
+		// Music is optional; a failed playlist request must not stop the display.
+		playlist = { availableFiles: [] };
+		playlistSource = 'unavailable (request failed)';
 	}
 
 	const fileCount = playlist?.availableFiles?.length || 0;

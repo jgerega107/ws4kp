@@ -55,25 +55,18 @@ If you would like to display weather information for international locations (ou
 
 ## Deployment Modes
 
-WeatherStar 4000+ supports two deployment modes:
+WeatherStar 4000+ requires the Node.js/Express server. Development serves individual modules; production serves optimized assets. Both include the weather proxy, dynamic playlist, and configured monitoring integrations.
 
 Development and server builds use Node.js 26.7.0 and npm 12.0.2. The included `.nvmrc` selects the matching Node release when using nvm, and the Docker builds install the matching npm release.
 
 The server listens on `0.0.0.0:8080` by default so Podman ports published from WSL are reachable from Windows. Set `WS4KP_HOST` or `WS4KP_PORT` to override either value.
 
-### Server Deployment (Recommended)
+### Express Server
 
 * Includes Node.js server with caching proxy for better performance (especially when running on a local server for multiple clients)
 * Server-side request deduplication and caching
 * Weather API observability and logging
 * Used by: `npm start`, `DIST=1 npm start`, the default `Dockerfile`, and `Dockerfile.server`
-
-### Static Deployment
-
-* Pure client-side deployment using nginx to serve static files
-* All API requests are made directly from each browser to the weather services
-* Browser-based caching
-* Used by: static file hosting and `Dockerfile.static`
 
 ## Other methods to run Ws4kp
 
@@ -82,21 +75,10 @@ The server listens on `0.0.0.0:8080` by default so Podman ports published from W
 npm start
 ```
 
-### Development Mode without proxy caching
-```bash
-STATIC=1 npm start
-```
-
 ### Production Mode (minified/concatenated JS, faster loading)
 ```bash
 npm run build
 DIST=1 npm start
-```
-
-### Production Mode without proxy caching (simulates static Docker deployment)
-```bash
-npm run build
-STATIC=1 DIST=1 npm start
 ```
 
 For all modes, access WeatherStar by going to: http://localhost:8080/
@@ -107,7 +89,6 @@ For all modes, access WeatherStar by going to: http://localhost:8080/
 - Uses individual JavaScript module files served directly
 - Easier debugging with source maps and readable code
 - Slower initial load (many HTTP requests for individual files)
-- Live file watching and faster development iteration
 
 **Production Mode (`DIST=1 npm start`):**
 - Uses minified and concatenated JavaScript bundles
@@ -170,34 +151,6 @@ docker compose -f docker-compose.example.yml up --build
 
 Service-name URLs such as `prometheus` and `loki` require those containers to share a Docker network with `ws4kp`.
 
-### Serving a static app
-
-There are several ways to deploy WeatherStar as a static app that runs entirely in the browser:
-
-**Manual static hosting (Apache, nginx, CDN, etc.):**
-Build static distribution files for upload to any web server:
-
-```bash
-npm run build
-```
-
-The resulting files in `/dist` can be uploaded to any web server; no server-side scripting is required.
-
-**Docker static deployment:**
-Build `Dockerfile.static` to use nginx without the Node.js server. Prometheus and Loki displays are not available in this mode:
-
-```bash
-docker build -f Dockerfile.static -t ws4kp-static .
-docker run -p 8080:8080 ws4kp-static
-```
-
-**Node.js in static mode:**
-Use the Node.js server as a static file host without the caching proxy:
-
-```bash
-STATIC=1 npm start          # Use Express to serve development files
-STATIC=1 DIST=1 npm start   # Use Express to serve (minimized) production files
-```
 
 ## What's different
 
@@ -227,11 +180,13 @@ https://weatherstar.netbymatt.com/?units-select=metric
 ```
 
 ### Kiosk mode
-Kiosk mode can be activated by a checkbox on the page. This will start Weatherstar in a fullscreen-like view without the play/volume/etc toolbar and scaled to fill the entire space. This does not activate the browser's fullscreen or kiosk mode. Those can only be activated by user interaction or by launching the browser with specific parameters such as `--start-fullscreen` or `--kiosk`. 
+Kiosk mode is enabled by default and automatically plays the display, including after a reload. It hides the settings and scales the display to the browser viewport.
 
- When using kiosk mode (via the checkbox), there will be no way to exit the fullscreen-like view of weatherstar. Reloading the page should remove the kiosk checkbox and return you to the normal view. This is deliberate as a browser's kiosk mode it intended not to be exited or significantly modified. A separate full-screen icon is available in the tool bar to go full-screen on a laptop or mobile browser.
+Press **Ctrl+K** to toggle kiosk mode. Exiting focuses the location field for keyboard setup; press Ctrl+K again to return. Space pauses/resumes, Left/Right changes screens, and F toggles browser fullscreen when focus is outside a form control.
 
-It's also possible to enter kiosk mode using a permalink. First generate a [Permalink](#sharing-a-permalink-bookmarking), then to the end of it add `&kiosk=true`. Opening this link will load all of the selected displays included in the Permalink, enter kiosk mode immediately upon loading and start playing the forecast.
+Open `http://localhost:8080/?kiosk=false` for setup, or append `&kiosk=false` to an existing permalink. Use `kiosk=true` to explicitly force kiosk mode. URL settings take precedence over saved preferences. **Remember Kiosk preference** (formerly Sticky Kiosk) optionally saves your choice across reloads; otherwise reload returns to kiosk by default. Existing saved preferences are respected.
+
+For unattended systems, configure the location and displays using a permalink or `WSQS_` environment variables. Browser chrome is separate from the app's kiosk view; launch your browser in its own kiosk/fullscreen mode if required. A failed core-data startup shows a visible status message and retries every 30 seconds automatically.
 
 ### Default query string parameters (environment variables)
 When serving this via the built-in Express server, it's possible to define environment variables that direct the user to a default set of parameters (like the  [Permalink](#sharing-a-permalink-bookmarking) above). If a user requests the root page at `http://localhost:8080/` the query string provided by environment variables will be appended to the url thus providing a default configuration.
@@ -240,11 +195,11 @@ Environment variables can be added to the command line as usual, or via a .env f
 
 Environment variables that are to be added to the default query string are prefixed with `WSQS_` and then use the same key/value pairs generated by the [Permalink](#sharing-a-permalink-bookmarking) above, with the `- (dash)` character replaced by an `_ (underscore)`. For example, if you wanted to turn the travel forecast on, you would find `travel-checkbox=true` in the permalink, its matching environment variable becomes `WSQS_travel=true`.
 
-When using the Docker container, these environment variables are read on container start-up to generate the static redirect HTML.
+The Express server reads these environment variables on startup and redirects requests without query parameters to the configured URL.
 
 ### Observability displays
 
-The Express server deployment can add opt-in monitoring displays to the normal WeatherStar playlist. These displays are not available in the static nginx deployment because the Node.js server performs every upstream request. Backend URLs, access tokens, PromQL, and LogQL are never sent to the browser.
+The Express server deployment can add opt-in monitoring displays to the normal WeatherStar playlist. The Node.js server performs every upstream request. Backend URLs, access tokens, PromQL, and LogQL are never sent to the browser.
 
 Set the environment variables for the services you want to enable before starting the server:
 
@@ -284,27 +239,11 @@ All observability displays start unchecked, refresh once per minute when enabled
 
 
 
-**Kiosk:** Immediately activates kiosk mode, which hides all settings. Exit by refreshing the page or using `Ctrl-K`. (Kiosk mode is similar to clicking the "Fullscreen" icon, but scales to the current browser viewport instead of activating the browser's actual "Fullscreen" mode.)
+**Kiosk:** Enabled by default. Press **Ctrl+K** to exit or re-enter, or use `?kiosk=false` for setup. Reloading returns to the default unless a URL or remembered preference overrides it.
 
-**Sticky Kiosk:** When enabled, stores the kiosk mode preference in local storage so the page automatically enters kiosk mode (maximizing the size of the main weather display without any settings) on subsequent visits. This feature is designed primarily for **iPhone and iPad users** who want to create a Home Screen app experience, since Mobile Safari doesn't support PWA installation via manifest.json or the Fullscreen API:
+**Remember Kiosk preference:** Stores your current kiosk choice across visits. This uses the existing `stickyKiosk` URL/storage key for compatibility. Leave it off for a display that should return to kiosk after reload.
 
-**For iOS/iPadOS (Mobile Safari):**
-
-1. Tap the _Share_ icon and choose **Add to Home Screen**
-2. Adjust the name as desired and tap **Add**
-3. Launch the newly-created Home Screen shortcut
-4. Configure all settings
-5. Tap to enable **Sticky Kiosk**
-6. _Make sure everything is configured exactly like you want it!_
-7. Tap **Kiosk**
-
-**For Android and Desktop browsers:** The included `manifest.json` file enables PWA (Progressive Web App) installation. To get the best app-like experience:
-
-1. Configure all your settings first (ignore the "Kiosk" and "Sticky Kiosk" settings)
-2. Create a permalink using the "Copy Permalink" feature and manually add `&kiosk=true` to the end
-3. Open the edited permalink URL in your browser
-4. Look for browser prompts to "Install" or "Add to Home Screen" from the kiosk-enabled URL
-5. The PWA will launch directly into kiosk mode (without forcing kiosk mode when accessed from the browser)
+For installed browser shortcuts, configure the location and displays first, then save a permalink with `kiosk=true` in the launch URL.
 
 For temporary fullscreen during regular browsing, use the fullscreen button in the toolbar.
 
@@ -332,7 +271,7 @@ If you're looking for the original music that played during forecasts [TWCClassi
 
 ### Customizing the music
 
-WeatherStar 4000+ supports background music during forecast playback. The music behavior depends on how you deploy the application:
+WeatherStar 4000+ supports background music during forecast playback. The server supplies the music playlist:
 
 #### Express server modes (`npm start`, `DIST=1 npm start`, the default `Dockerfile`, or `Dockerfile.server`)
 
@@ -344,26 +283,6 @@ When running with Node.js, the server generates a `playlist.json` file by scanni
 ```bash
 docker build -f Dockerfile.server -t ws4kp-server .
 docker run -p 8080:8080 -v /path/to/local/music:/app/server/music ws4kp-server
-```
-
-#### Static hosting modes (`Dockerfile.static`, nginx, Apache, etc.)
-
-When hosting static files, there are two scenarios:
-
-**Static Docker deployment:** The build process creates a `playlist.json` file with default tracks, but the Docker image _intentionally_ removes it to force browser-based directory scanning. The browser attempts to fetch `playlist.json`, receives a 404 response with the `X-Weatherstar` header, which causes it to  fallback to scanning the `music/` directory.
-
-**Manual static hosting:** If you build and upload the files yourself (`npm run build`), `playlist.json` will contain the default tracks unless you customize `./server/music/` before building.
-
-For directory scanning to work properly:
-* Your web server must generate directory listings for the `music/` path
-* Your web server must set the `X-Weatherstar: true` header (the provided nginx configuration does this)
-
-**Adding your own music:** Place `.mp3` files in `music/` (or bind mount to `/usr/share/nginx/html/music` for Docker)
-
-**Docker static example:**
-```bash
-docker build -f Dockerfile.static -t ws4kp-static .
-docker run -p 8080:8080 -v /path/to/local/music:/usr/share/nginx/html/music ws4kp-static
 ```
 
 Subdirectories will not be scanned. When WeatherStar loads in the browser, it randomizes the track order and reshuffles on each loop through the playlist.
@@ -396,7 +315,6 @@ A hooks are provided as `server/scripts/custom.js` and `server/scripts/custom.mj
 
 When using Docker:
 
-* **Static deployment**: Mount your `custom.js` file to `/usr/share/nginx/html/scripts/custom.js`
 * **Server deployment**: Mount your `custom.js` file to `/app/server/scripts/custom.js`
 
 ### Custom text scroll

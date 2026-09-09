@@ -517,6 +517,19 @@ body {
 	bottom: 0px;
 }
 
+#startup-error {
+	position: relative;
+	z-index: 10000;
+	padding: 2rem;
+	background: #000;
+	color: #fff;
+
+	body.kiosk & {
+		position: fixed;
+		inset: 0;
+	}
+}
+
 .kiosk {
 	#divTwc #divTwcBottom {
 		display: none;
