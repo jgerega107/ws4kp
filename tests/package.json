@@ -15,7 +15,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"chalk": "^6.0.0",
-		"puppeteer": "^25.7.0"
+		"puppeteer": "^25.16.0"
 	},
 	"allowScripts": {
 		"puppeteer@25.7.0": true
